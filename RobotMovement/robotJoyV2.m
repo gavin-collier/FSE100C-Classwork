@@ -4,7 +4,7 @@ display('Starting Xbox Movement!');
 % -- Static Vars -- %
 
 gears = [.33, .66, 1];
-controllerLibrary = NET.addAssembly([pwd '.\SharpDX.XInput-StandAlone.dll']);
+controllerLibrary = NET.addAssembly(['C:\Users\jaslo\FSE100C-Classwork\SharpDX.XInput-StandAlone.dll']);
 MAX_DEG_PER_SEC = 960;
 
 % Initialize the controller and check its connection status
@@ -22,6 +22,8 @@ rightCmd = 0;
 beepCooldown = 0;
 currentGear = 3;
 gears = [.33, .66, 1];
+liftMoving = 0;
+
 % 
 
 % -- Master Loop -- %
@@ -59,6 +61,21 @@ while (1)
         end
         beepCooldown = beepCooldown - 1;
     end
+
+    if State.Gamepad.Buttons == SharpDX.XInput.GamepadButtonFlags.LeftShoulder && liftMoving == 0
+        brick.motorPower('C', 75);
+        liftMoving = 1;
+    end 
+    if State.Gamepad.Buttons == SharpDX.XInput.GamepadButtonFlags.RightShoulder && liftMoving == 0
+        liftMoving = 1;
+        brick.motorPower('C', -75);
+    end
+    if State.Gamepad.Buttons ~= SharpDX.XInput.GamepadButtonFlags.RightShoulder && State.Gamepad.Buttons ~= SharpDX.XInput.GamepadButtonFlags.LeftShoulder
+        liftMoving = 0;
+        brick.motorPower('C', 0);
+    end
+
+    disp("yInput = " + yInput);
 
     % gears
     % Update current gear based on controller input
@@ -103,6 +120,11 @@ while (1)
     % break Buttion 
      if (State.Gamepad.Buttons == SharpDX.XInput.GamepadButtonFlags.B)
         disp("B pressed")
+        leftCmd = 0;
+        rightCmd = 0;
+     end
+
+     if (yInput == 0 && xInput == 0)
         leftCmd = 0;
         rightCmd = 0;
     end
